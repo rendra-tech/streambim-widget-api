@@ -487,14 +487,24 @@
       }
 
       var colorCodeByPropertyClicked = function () {
-        var pset = document.getElementById('psetInput').value;
-        var propertyKey = document.getElementById('propertyKeyInput').value;
+        var query = {
+          key: '@kind',
+          value: 'Door'
+        }
+        var pset = 'BaseQuantities'
+        var propertyKey = 'Height'
 
-        StreamBIM.colorCodeByProperty({pset, propertyKey}).then( (result) => {
-          logEvent('colorCodeByProperty: ' + result);
-        }).catch( function(error) {
-          logError('colorCodeByProperty', error);
-        });
+        StreamBIM.applyObjectSearch(query).then( (result) => {
+          StreamBIM.colorCodeByProperty({pset, propertyKey}).then( (result) => {
+            logEvent('colorCodeByProperty: ' + result);
+          }).catch( (err) => {
+            logEvent('colorCodeByProperty failed');
+            console.error(err);
+          })
+        }).catch( (err) => {
+          logEvent('applyObjectSearch failed');
+          console.error(err);
+        })
       }
 
       var resetColorCodeByPropertyClicked = function () {

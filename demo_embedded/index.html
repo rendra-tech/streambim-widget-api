@@ -149,6 +149,7 @@
     </div>
     <script src="../dist/streambim-widget-api.min.js"></script>
     <script>
+      var createdObjects = [];
       var logEvent = function(text) {
         var element = document.createElement('li');
         element.textContent = text;
@@ -173,6 +174,28 @@
 
       StreamBIM.connectToChild(iframe, {
         pickedObject: function (result) {
+          if (window.createObjectMode) {
+            StreamBIM.createObject({
+              center: result.point, 
+              name: 'Test object'
+            }).then( function(guid) {
+              logEvent('Created object with GUID: ' + guid);
+              createdObjects.push(guid);
+              colorCoding = {}
+              createdObjects.forEach(function(guid) {
+                colorCoding[guid] = 'red';
+              });
+              StreamBIM.colorCodeObjects(colorCoding).then( (result) => {
+                logEvent('colorCodeObjects: ' + result);
+              }).catch( function(error) {
+                logError('colorCodeObjects', error);
+              });
+            }).catch( function(error) {
+              logError('createObject', error);
+            });
+            return
+          }
+          
           if (result.point) {
             logEvent('Clicked object "' + result.guid + '" at (' + result.point[0].toFixed(2) + ', ' + result.point[1].toFixed(2) + ', ' + result.point[2].toFixed(2) + ')');
           } else {
@@ -196,6 +219,7 @@
           logEvent('Camera changed: ' + JSON.stringify(cameraState));
         },
         beforeInit: function() {
+          StreamBIM.setAuthToken('XXXX')
           StreamBIM.setStyles('.message-container {background-color: white;}')
           StreamBIM.setSkyColor('white')
           StreamBIM.setNavigationMode(1)
