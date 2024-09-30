@@ -204,6 +204,39 @@ Returns a promise which is resolved with an an array of GUIDs for objects matchi
 }
 ```
 
+The following example demonstrates how to search for objects, apply the results to the 3D scene, and set the visualization mode:
+
+Tip: Use browser developer tools to inspect network requests after performing a search in StreamBIM. Find the "ifc-searches" request, and examine the request payload for search parameters.
+
+```javascript
+// Define search rules and create query object for search
+let querySearch = {
+    filter: {
+        rules: [[{
+            psetName: "BIP",
+            propKey: "TypeID",
+            propType: "str",
+            propValue: "123456",
+            buildingId: "1000"
+        }]]
+    },
+    page: { limit: 10, skip: 0 },
+    sort: { field: 'BIP.TypeID', descending: false }
+};
+
+// Perform search and apply results
+StreamBIM.findObjects(querySearch).then(function(response) {
+    console.log("getObjectInfoForSearch", response);
+    let query = { rules: querySearch.filter.rules };
+
+    StreamBIM.applyObjectSearch(query).then( (result) => {
+        StreamBIM.setSearchVisualizationMode('PERMANENT');
+    }).catch( function(error) {
+        console.log("Error applying object search", error);
+    });
+});
+```
+
 ### `getObjectInfoForSearch(query)`
 Filter the 3D scene to show only objects matching the filter. See `findObjects(query)` for filter options.
 
